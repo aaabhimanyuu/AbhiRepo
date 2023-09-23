@@ -1,0 +1,87 @@
+name: Deploy abhi-webapp
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  abhiwebapp:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Nginx
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nginx
+
+    - name: Remove default Nginx configuration
+      run: |
+        sudo rm /etc/nginx/sites-available/default
+        sudo rm /etc/nginx/sites-enabled/default
+
+    - name: Create /etc/website directory
+      run: |
+        sudo mkdir -p /etc/website
+
+    - name: Copy files to /etc/website
+      run: |
+        sudo cp -r assets /etc/website
+        sudo cp -r forms /etc/website
+        sudo cp index.html /etc/website
+        sudo cp inner-page.html /etc/website
+        sudo cp portfolio-details.html /etc/website
+
+    - name: Verify /etc/website directory
+      run: |
+        if [ -d "/etc/website" ]; then
+          echo "Website directory exists."
+        else
+          echo "Website directory does not exist."
+          exit 1  # Exit with an error code
+        fi
+
+    - name: Copy file1 to /etc/nginx/sites-available
+      run: sudo cp file1 /etc/nginx/sites-available
+
+    - name: Verify /etc/nginx/sites-available/file1
+      run: |
+        if [ -f "/etc/nginx/sites-available/file1" ]; then
+          echo "file1 copied to /etc/nginx/sites-available."
+        else
+          echo "file1 was not copied to /etc/nginx/sites-available."
+          exit 1  # Exit with an error code
+        fi
+
+    - name: Soft-link
+      run: sudo ln -s /etc/nginx/sites-available/* /etc/nginx/sites-enabled/
+
+    - name: Verify symbolic links
+      run: |
+        if [ -n "$(find /etc/nginx/sites-enabled -type l)" ]; then
+          echo "Symbolic links created in /etc/nginx/sites-enabled."
+        else
+          echo "No symbolic links found in /etc/nginx/sites-enabled."
+          exit 1  # Exit with an error code
+        fi
+
+    - name: Restart nginx
+      run: sudo systemctl restart nginx
+
+    - name: Display Nginx Access Log
+      run: |
+        sudo cat /var/log/nginx/access.log
+
+    - name: Display Nginx Error Log
+      run: |
+        sudo cat /var/log/nginx/error.log
+
+    - name: Configure Git
+      run: |
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+        git config --global credential.helper store  # Store Git credentials
+        echo "https://github.com:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
