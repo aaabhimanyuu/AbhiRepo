@@ -1,4 +1,4 @@
-name: Deploy: abhi-webapp
+name: Deploy abhi-webapp
 
 on:
   push:
@@ -28,3 +28,4 @@ jobs:
 
     - name: restart nginx
       run: systemctl restart nginx
+
