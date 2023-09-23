@@ -28,4 +28,3 @@ jobs:
 
     - name: restart nginx
       run: systemctl restart nginx
-
