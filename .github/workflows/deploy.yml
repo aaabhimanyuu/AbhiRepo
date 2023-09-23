@@ -1,0 +1,30 @@
+name: Deploy: abhi-webapp
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  abhiwebapp:
+    runs-on: ubuntu
+
+    steps:
+    - name: checkout-code
+      uses: actions/checkout@v2
+
+    - name: copy-files
+      run: cp file1 /etc/nginx/sites-available
+
+    - name: soft-link
+      run: ln -s /etc/nginx/sites-available/* /etc/nginx/sites-enabled/
+
+    - name: Configure Git
+      run: |
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+        git config --global credential.helper store  # Store Git credentials
+        echo "https://github.com:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+
+    - name: restart nginx
+      run: systemctl restart nginx
